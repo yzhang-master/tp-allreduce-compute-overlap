@@ -1,0 +1,161 @@
+{
+  "backend": "gloo",
+  "device": "cpu",
+  "world_size": 2,
+  "decode_tokens_per_repeat": 8,
+  "repeats": 5,
+  "measured_at": "2026-11-14T16:00:17+0100",
+  "environment": {
+    "python": "3.12.3",
+    "torch": "2.15.0+cpu",
+    "platform": "Linux-6.8.0-149-generic-x86_64-with-glibc2.39",
+    "torch_threads": 1
+  },
+  "modes": {
+    "sequential": {
+      "prefill_rank_mean": {
+        "mean_ms": 23.4785315,
+        "p50_ms": 23.4785315,
+        "p95_ms": 24.04790885
+      },
+      "inter_token_rank_mean": {
+        "mean_ms": 27.9824871375,
+        "p50_ms": 27.9824871375,
+        "p95_ms": 27.99796912875
+      },
+      "overlap_ms_per_decode_rank_mean": 0.0,
+      "max_abs_logit_error": 2.980232238769531e-07,
+      "rank0_timeline_sample": [
+        {
+          "layer": "attention",
+          "chunk": 0,
+          "kind": "gemm",
+          "start_ns": 0,
+          "end_ns": 16300
+        },
+        {
+          "layer": "attention",
+          "chunk": 0,
+          "kind": "allreduce",
+          "start_ns": 47011,
+          "end_ns": 4010860
+        },
+        {
+          "layer": "attention",
+          "chunk": 1,
+          "kind": "gemm",
+          "start_ns": 4056972,
+          "end_ns": 4158405
+        },
+        {
+          "layer": "attention",
+          "chunk": 1,
+          "kind": "allreduce",
+          "start_ns": 4166775,
+          "end_ns": 4930540
+        },
+        {
+          "layer": "mlp",
+          "chunk": 0,
+          "kind": "gemm",
+          "start_ns": 5410577,
+          "end_ns": 5440848
+        },
+        {
+          "layer": "mlp",
+          "chunk": 0,
+          "kind": "allreduce",
+          "start_ns": 5448528,
+          "end_ns": 6945296
+        },
+        {
+          "layer": "mlp",
+          "chunk": 1,
+          "kind": "gemm",
+          "start_ns": 6962977,
+          "end_ns": 7067840
+        },
+        {
+          "layer": "mlp",
+          "chunk": 1,
+          "kind": "allreduce",
+          "start_ns": 7074260,
+          "end_ns": 8061343
+        }
+      ]
+    },
+    "overlapped": {
+      "prefill_rank_mean": {
+        "mean_ms": 29.6524682,
+        "p50_ms": 29.6524682,
+        "p95_ms": 30.949419680000005
+      },
+      "inter_token_rank_mean": {
+        "mean_ms": 26.659343000000003,
+        "p50_ms": 26.659343000000003,
+        "p95_ms": 27.083087075000005
+      },
+      "overlap_ms_per_decode_rank_mean": 0.35384361249999996,
+      "max_abs_logit_error": 2.980232238769531e-07,
+      "rank0_timeline_sample": [
+        {
+          "layer": "attention",
+          "chunk": 0,
+          "kind": "gemm",
+          "start_ns": 0,
+          "end_ns": 44721
+        },
+        {
+          "layer": "attention",
+          "chunk": 1,
+          "kind": "gemm",
+          "start_ns": 2035566,
+          "end_ns": 2376977
+        },
+        {
+          "layer": "attention",
+          "chunk": 0,
+          "kind": "allreduce",
+          "start_ns": 59262,
+          "end_ns": 19432485
+        },
+        {
+          "layer": "attention",
+          "chunk": 1,
+          "kind": "allreduce",
+          "start_ns": 19620772,
+          "end_ns": 25711901
+        },
+        {
+          "layer": "mlp",
+          "chunk": 0,
+          "kind": "gemm",
+          "start_ns": 26466086,
+          "end_ns": 26503877
+        },
+        {
+          "layer": "mlp",
+          "chunk": 1,
+          "kind": "gemm",
+          "start_ns": 26671903,
+          "end_ns": 26700654
+        },
+        {
+          "layer": "mlp",
+          "chunk": 0,
+          "kind": "allreduce",
+          "start_ns": 26513508,
+          "end_ns": 37853829
+        },
+        {
+          "layer": "mlp",
+          "chunk": 1,
+          "kind": "allreduce",
+          "start_ns": 37892980,
+          "end_ns": 40045601
+        }
+      ]
+    }
+  },
+  "measured_itl_change_percent": -4.728472244080195
+}

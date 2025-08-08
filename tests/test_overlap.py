@@ -1,3 +1,5 @@
+import time
+
 import pytest
 import torch
 
@@ -5,17 +7,21 @@ from tp_overlap.overlap import OverlapTimeline, row_parallel_gemm
 
 
 class FakeWork:
+    def __init__(self, on_wait) -> None:
+        self.on_wait = on_wait
+
     def wait(self):
-        return None
+        self.on_wait()
 
 
 def _run(monkeypatch, asynchronous: bool):
     monkeypatch.setattr("torch.distributed.is_initialized", lambda: True)
     calls = []
+    waits = []
 
     def fake_all_reduce(tensor, async_op):
         calls.append((tensor.clone(), async_op))
-        return FakeWork() if async_op else None
+        return FakeWork(lambda: waits.append(time.perf_counter_ns())) if async_op else None
 
     monkeypatch.setattr("torch.distributed.all_reduce", fake_all_reduce)
     torch.set_num_threads(1)
@@ -30,11 +36,11 @@ def _run(monkeypatch, asynchronous: bool):
         timeline=timeline,
         layer="test",
     )
-    return output, local_input @ weight.T, timeline, calls
+    return output, local_input @ weight.T, timeline, calls, waits
 
 
 def test_async_work_is_outstanding_during_next_gemm(monkeypatch):
-    output, expected, timeline, calls = _run(monkeypatch, True)
+    output, expected, timeline, calls, waits = _run(monkeypatch, True)
     torch.testing.assert_close(output, expected)
     assert [call[1] for call in calls] == [True, True]
     assert timeline.overlap_seconds() > 0
@@ -44,12 +50,14 @@ def test_async_work_is_outstanding_during_next_gemm(monkeypatch):
     )
     assert first_reduce.start_ns < second_gemm.start_ns
     assert second_gemm.end_ns <= first_reduce.end_ns
+    assert waits[0] >= second_gemm.end_ns
 
 
 def test_synchronous_path_has_no_overlap(monkeypatch):
-    output, expected, timeline, calls = _run(monkeypatch, False)
+    output, expected, timeline, calls, waits = _run(monkeypatch, False)
     torch.testing.assert_close(output, expected)
     assert [call[1] for call in calls] == [False, False]
+    assert not waits
     assert timeline.overlap_seconds() == 0
 
 
